@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit User - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Edit: {{ user.get_full_name }}</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.first_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.last_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.email.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.phone_number.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-6">
+            <div class="flex items-center">
+                {{ form.is_active }}
+                <label class="ml-2 text-gray-700 text-sm font-bold">Active Account</label>
+            </div>
+            {% if form.is_active.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.is_active.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-between">
+            <a href="{% url 'user_management' %}"
+                class="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">
+                Cancel
+            </a>
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Update User
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

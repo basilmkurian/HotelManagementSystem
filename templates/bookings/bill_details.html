@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}Bill Details - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <!-- Header with Print Button -->
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Bill Details</h2>
+        <button onclick="printBill()" 
+                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Print Bill
+        </button>
+    </div>
+
+    <!-- Booking Information -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-md">
+        <h3 class="text-lg font-semibold mb-4">Stay Information</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Room Number</p>
+                <p class="font-medium">{{ booking.room.room_number }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Guest Name</p>
+                <p class="font-medium">{{ booking.guest.get_full_name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-in Date</p>
+                <p class="font-medium">{{ booking.check_in_date|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-out Date</p>
+                <p class="font-medium">{{ booking.check_out_date|date:"M d, Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Charges -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4">Room Charges</h3>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <div class="flex justify-between mb-2">
+                <span>Room Rate (per night)</span>
+                <span>₹{{ booking.room.category.base_price }}</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span>Number of Nights</span>
+                <span>{{ bill_details.total_nights }}</span>
+            </div>
+            <div class="flex justify-between font-semibold">
+                <span>Total Room Charges</span>
+                <span>₹{{ bill_details.room_charges }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Charges -->
+    {% if bill_details.services %}
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4">Additional Services</h3>
+        <div class="bg-gray-50 p-4 rounded-md">
+            {% for service_type, items in bill_details.services.items %}
+            <div class="mb-4">
+                <h4 class="font-medium mb-2">{{ service_type }}</h4>
+                {% for item in items %}
+                <div class="flex justify-between text-sm mb-1">
+                    <span>{{ item.description }}</span>
+                    <span>₹{{ item.cost }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <div class="border-t pt-2 flex justify-between font-semibold">
+                <span>Total Service Charges</span>
+                <span>₹{{ bill_details.total_service_charges }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Bill Summary -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4">Bill Summary</h3>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span>Room Charges</span>
+                    <span>₹{{ bill_details.room_charges }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Service Charges</span>
+                    <span>₹{{ bill_details.total_service_charges }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Taxes ({{ bill_details.tax_rate }}%)</span>
+                    <span>₹{{ bill_details.tax_amount }}</span>
+                </div>
+                <div class="border-t pt-2 mt-2">
+                    <div class="flex justify-between font-bold">
+                        <span>Total Amount</span>
+                        <span>₹{{ bill_details.total_amount }}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between text-green-600">
+                    <span>Total Paid</span>
+                    <span>₹{{ bill_details.total_paid }}</span>
+                </div>
+                <div class="flex justify-between font-bold text-red-600">
+                    <span>Balance Due</span>
+                    <span>₹{{ bill_details.balance }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History -->
+    {% if payments %}
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4">Payment History</h3>
+        <div class="bg-gray-50 p-4 rounded-md">
+            {% for payment in payments %}
+            <div class="flex justify-between items-center mb-2 text-sm">
+                <div>
+                    <span class="font-medium">₹{{ payment.amount }}</span>
+                    <span class="text-gray-600 ml-2">via {{ payment.get_payment_method_display }}</span>
+                </div>
+                <span class="text-gray-600">{{ payment.payment_date|date:"M d, Y H:i" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Add this before the payment buttons -->
+    <div class="mb-6">
+        {% if bill_details.balance > 0 %}
+        <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
+        <div class="flex space-x-4">
+            <button id="cash-payment-btn" 
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Pay with Cash
+            </button>
+            
+            <button id="rzp-button"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    data-amount="{{ bill_details.balance }}"
+                    data-booking="{{ booking.id }}"
+                    data-email="{{ booking.guest.email }}"
+                    data-name="{{ booking.guest.get_full_name }}">
+                Pay Online
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Add this for cash payment form -->
+    <div id="cash-payment-form" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Cash Payment</h3>
+            <form method="POST" action="{% url 'process_cash_payment' booking.id %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Amount</label>
+                    <input type="number" 
+                           name="amount" 
+                           step="0.01" 
+                           max="{{ bill_details.balance }}" 
+                           value="{{ bill_details.balance }}"
+                           class="w-full px-3 py-2 border rounded-md"
+                           required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" 
+                            id="cancel-cash-payment"
+                            class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Process Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="flex justify-between">
+        <a href="{% url 'dashboard' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Add this right after the payment button -->
+    <div id="payment-error" class="hidden mt-4 p-4 bg-red-100 text-red-700 rounded"></div>
+</div>
+
+<!-- Razorpay Integration -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('rzp-button').onclick = function(e) {
+    e.preventDefault();
+    const button = e.target;
+    const amount = Math.round(parseFloat(button.dataset.amount) * 100);
+    const bookingId = button.dataset.booking;
+    const email = button.dataset.email;
+    const name = button.dataset.name;
+
+    var options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": amount,
+        "currency": "INR",
+        "name": "HMS Booking Payment",
+        "description": "Booking #" + bookingId,
+        "handler": function (response) {
+            document.getElementById('payment-error').classList.add('hidden');
+            fetch('/verify-payment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    payment_id: response.razorpay_payment_id,
+                    booking_id: bookingId,
+                    amount: amount / 100
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    throw new Error(data.error || 'Payment verification failed');
+                }
+            })
+            .catch(error => {
+                document.getElementById('payment-error').textContent = error.message;
+                document.getElementById('payment-error').classList.remove('hidden');
+            });
+        },
+        "prefill": {
+            "name": name,
+            "email": email
+        },
+        "theme": {
+            "color": "#3B82F6"
+        }
+    };
+
+    try {
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+    } catch (error) {
+        document.getElementById('payment-error').textContent = 'Failed to initialize payment: ' + error.message;
+        document.getElementById('payment-error').classList.remove('hidden');
+    }
+};
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.getElementById('cash-payment-btn').onclick = function() {
+    document.getElementById('cash-payment-form').classList.remove('hidden');
+};
+
+document.getElementById('cancel-cash-payment').onclick = function() {
+    document.getElementById('cash-payment-form').classList.add('hidden');
+};
+</script>
+
+<script>
+function printBill() {
+    window.print();
+}
+</script>
+
+<style>
+@media print {
+    /* Hide non-essential elements when printing */
+    nav, footer, button {
+        display: none !important;
+    }
+    /* Ensure white background and black text */
+    body {
+        background: white;
+        color: black;
+    }
+    .shadow-md {
+        box-shadow: none !important;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Guest Check-Out - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Guest Check-Out</h2>
+
+    <!-- Booking Details -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-md">
+        <h3 class="text-lg font-semibold mb-4">Stay Details</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Room Number</p>
+                <p class="font-medium">{{ booking.room.room_number }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Guest Name</p>
+                <p class="font-medium">{{ booking.guest.get_full_name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-in Date</p>
+                <p class="font-medium">{{ booking.check_in_date|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-out Date</p>
+                <p class="font-medium">{{ booking.check_out_date|date:"M d, Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Summary -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold mb-4">Bill Summary</h3>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span>Room Charges ({{ booking.total_nights }} nights)</span>
+                    <span>₹{{ booking.room_charges }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Additional Services</span>
+                    <span>₹{{ booking.service_charges }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Taxes (18%)</span>
+                    <span>₹{{ booking.tax_amount }}</span>
+                </div>
+                <div class="border-t pt-2 mt-2">
+                    <div class="flex justify-between font-bold">
+                        <span>Total Amount</span>
+                        <span>₹{{ booking.total_amount }}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between text-green-600">
+                    <span>Advance Paid</span>
+                    <span>₹{{ booking.advance_payment }}</span>
+                </div>
+                <div class="flex justify-between font-bold text-red-600">
+                    <span>Balance Due</span>
+                    <span>₹{{ booking.balance_amount }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Payment Details -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Payment Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Payment Mode</label>
+                    {{ payment.payment_method }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Amount Paid</label>
+                    {{ booking.total_amount }}
+                </div>
+            </div>
+        </div>`
+
+        <div class="flex justify-between">
+            <a href="{% url 'dashboard' %}" 
+               class="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">
+                Cancel
+            </a>
+            <button type="submit" class="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600">
+                Complete Check-Out
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

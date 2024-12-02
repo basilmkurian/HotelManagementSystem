@@ -1,0 +1,15 @@
+{% block content %}
+
+    {% if user.role == 'admin' %}
+        {% include 'dashboard/admin_dashboard.html' %}
+    {% elif user.role == 'manager' %}
+        {% include 'dashboard/manager_dashboard.html' %}
+    {% elif user.role == 'receptionist' %}
+        {% include 'dashboard/receptionist_dashboard.html' %}
+    {% elif user.role == 'housekeeping' %}
+        {% include 'dashboard/housekeeping_dashboard.html' %}
+    {% else %}
+        {% include 'dashboard/guest_dashboard.html' %}
+    {% endif %}
+
+{% endblock %} 

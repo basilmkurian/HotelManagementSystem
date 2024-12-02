@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Management - HMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Inventory Management</h1>
+        <a href="{% url 'inventory_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            Add New Item
+        </a>
+    </div>
+
+    <!-- Inventory Grid -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for item in inventory_items %}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">{{ item.name }}</h3>
+                        <p class="text-sm text-gray-600">Category: {{ item.category }}</p>
+                    </div>
+                    <span class="px-2 py-1 text-sm rounded {% if item.quantity < item.minimum_threshold %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                        {{ item.quantity }} remaining
+                    </span>
+                </div>
+
+                <div class="border-t pt-4">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Minimum Threshold</p>
+                            <p class="font-medium">{{ item.minimum_threshold }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Last Restocked</p>
+                            <p class="font-medium">{{ item.last_restocked|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <form method="post" action="{% url 'restock_item' item.id %}" class="flex space-x-2">
+                            {% csrf_token %}
+                            <input type="number" name="quantity" class="w-20 px-2 py-1 border rounded" 
+                                   placeholder="Qty" min="1">
+                            <button type="submit" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                                Add Stock
+                            </button>
+                        </form>
+                        <a href="{% url 'inventory_edit' item.id %}" 
+                           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-8">
+            <p class="text-gray-500">No inventory items found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

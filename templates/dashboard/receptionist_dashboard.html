@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <!-- Room Status -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Room Status</h2>
+        <div class="space-y-2">
+            <p>Available Rooms: {{ available_rooms }}</p>
+            <p>Reserved Rooms: {{ reserved_rooms }}</p>
+            <p>Occupied Rooms: {{ occupied_rooms }}</p>
+            <p>Under Maintenance: {{ maintenance_rooms }}</p>
+            <a href="{% url 'room_list' %}" class="text-blue-500 hover:underline">View Details</a>
+        </div>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Recent Bookings</h2>
+        <div class="space-y-2">
+            {% for booking in recent_bookings %}
+            <div class="border-b pb-2">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p>{{ booking.guest.get_full_name }} - Room {{ booking.room.room_number }}</p>
+                        <p class="text-sm text-gray-500">{{ booking.check_in_date|date:"M d, Y" }} to {{ booking.check_out_date|date:"M d, Y" }}</p>
+                        <span class="text-sm px-2 py-1 rounded-full
+                            {% if booking.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                            {% elif booking.status == 'CONFIRMED' %}bg-green-100 text-green-800
+                            {% elif booking.status == 'CHECKED_IN' %}bg-blue-100 text-blue-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </div>
+                    <div>
+                        {% if booking.status == 'pending' or booking.status == 'PENDING' %}
+                        <a href="{% url 'approve_booking' booking.id %}" 
+                           class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                            Approve
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center">No recent bookings.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

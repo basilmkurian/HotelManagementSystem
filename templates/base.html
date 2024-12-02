@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hotel Management System{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js for dropdown functionality -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Decimal.js for precise decimal calculations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+</head>
+
+<body class="min-h-screen bg-gray-100 text-gray-800 flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{% url 'dashboard' %}" class="text-2xl font-bold">HMS</a>
+
+            <!-- Navigation based on user role -->
+            <nav class="space-x-4">
+                {% if user.is_authenticated %}
+                {% if user.role == 'admin' %}
+                <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-blue-500">Dashboard</a>
+                <a href="{% url 'room_list' %}" class="text-gray-700 hover:text-blue-500">Rooms</a>
+                <a href="{% url 'generate_reports' %}" class="text-gray-700 hover:text-blue-500">Reports</a>
+                <a href="{% url 'payroll_summary' %}" class="text-gray-700 hover:text-blue-500">Payroll</a>
+                {% elif user.role == 'manager' %}
+                <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-blue-500">Dashboard</a>
+                <a href="{% url 'booking_list' %}" class="text-gray-700 hover:text-blue-500">Bookings</a>
+                <a href="{% url 'staff_list' %}" class="text-gray-700 hover:text-blue-500">Staff</a>
+                <a href="{% url 'inventory_list' %}" class="text-gray-700 hover:text-blue-500">Inventory</a>
+                {% elif user.role == 'receptionist' %}
+                <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-blue-500">Dashboard</a>
+                <a href="{% url 'booking_list' %}" class="text-gray-700 hover:text-blue-500">Reservations</a>
+                {% elif user.role == 'housekeeping' %}
+                <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-blue-500">Dashboard</a>
+                {% else %} <!-- Guest -->
+                <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-blue-500">Dashboard</a>
+                <a href="{% url 'booking_list' %}" class="text-gray-700 hover:text-blue-500">My Bookings</a>
+                {% endif %}
+                {% endif %}
+            </nav>
+
+            <!-- User Menu -->
+            <div class="flex items-center">
+                {% if user.is_authenticated %}
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-blue-500">
+                        <span>{{ user.get_full_name|default:user.username }}</span>
+                        <span class="text-sm text-gray-500">({{ user.role|title }})</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" @click.away="open = false"
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                        <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            Profile
+                        </a>
+                        <a href="{% url 'notifications_list' %}"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            Notifications
+                        </a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="space-x-4">
+                    <a href="{% url 'login' %}" class="text-blue-500 hover:underline">Login</a>
+                    <a href="{% url 'register' %}" class="text-blue-500 hover:underline">Register</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div
+                class="p-4 rounded-md {% if message.tags == 'error' %}bg-red-100 border-red-500 text-red-700{% else %}bg-green-100 border-green-500 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-200 text-center py-4 mt-auto">
+        <p>&copy; {% now "Y" %} Hotel Management System. All rights reserved.</p>
+    </footer>
+</body>
+
+
+</html>

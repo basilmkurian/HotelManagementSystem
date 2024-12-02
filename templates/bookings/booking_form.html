@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Room - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Book a Room</h2>
+
+    <!-- Room Details -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-md">
+        <h3 class="text-lg font-semibold mb-4">Room Details</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Room Number</p>
+                <p class="font-medium">{{ room.room_number }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Room Type</p>
+                <p class="font-medium">{{ room.category.name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Price per Night</p>
+                <p class="font-medium">₹{{ room.category.base_price }}</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Booking Dates -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Check-in Date</label>
+                {{ form.check_in_date }}
+                {% if form.check_in_date.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.check_in_date.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Check-out Date</label>
+                {{ form.check_out_date }}
+                {% if form.check_out_date.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.check_out_date.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Guest Details -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Guest Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Number of Adults</label>
+                    {{ form.adults }}
+                    {% if form.adults.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.adults.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Number of Children</label>
+                    {{ form.children }}
+                    {% if form.children.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.children.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Payment Details</h3>
+            <div class="bg-gray-50 p-4 rounded-md mb-4">
+                <div class="flex justify-between mb-2">
+                    <span>Room Charges</span>
+                    <span id="roomCharges">₹0.00</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>Taxes (18%)</span>
+                    <span id="taxes">₹0.00</span>
+                </div>
+                <div class="flex justify-between font-bold">
+                    <span>Total Amount</span>
+                    <span id="totalAmount">₹0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+            Book Room
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkInDate = document.getElementById('id_check_in_date');
+    const checkOutDate = document.getElementById('id_check_out_date');
+    
+    // Convert base price to string to maintain decimal precision
+    const basePrice = '{{ room.category.base_price|default:"0" }}';
+    const taxRate = '0.18';
+    
+    function calculateTotal(price, nights = 1) {
+        // Use string operations and convert to number only for final display
+        const roomCharges = (parseFloat(price) * nights).toFixed(2);
+        const taxes = (parseFloat(roomCharges) * parseFloat(taxRate)).toFixed(2);
+        const total = (parseFloat(roomCharges) + parseFloat(taxes)).toFixed(2);
+        
+        return {
+            roomCharges,
+            taxes,
+            total
+        };
+    }
+    
+    // Set initial values
+    const initial = calculateTotal(basePrice);
+    document.getElementById('roomCharges').textContent = `₹${initial.roomCharges}`;
+    document.getElementById('taxes').textContent = `₹${initial.taxes}`;
+    document.getElementById('totalAmount').textContent = `₹${initial.total}`;
+    
+    // Set initial advance payment
+    const advancePayment = document.getElementById('advancePayment');
+    if (advancePayment) {
+        advancePayment.max = initial.total;
+        advancePayment.min = (parseFloat(initial.total) * 0.2).toFixed(2);
+        advancePayment.value = advancePayment.min;
+    }
+    
+    function calculateCharges() {
+        if (checkInDate.value && checkOutDate.value) {
+            const start = new Date(checkInDate.value);
+            const end = new Date(checkOutDate.value);
+            const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            
+            if (nights > 0) {
+                const charges = calculateTotal(basePrice, nights);
+                document.getElementById('roomCharges').textContent = `₹${charges.roomCharges}`;
+                document.getElementById('taxes').textContent = `₹${charges.taxes}`;
+                document.getElementById('totalAmount').textContent = `₹${charges.total}`;
+                
+                if (advancePayment) {
+                    advancePayment.max = charges.total;
+                    advancePayment.min = (parseFloat(charges.total) * 0.2).toFixed(2);
+                    if (!advancePayment.value) {
+                        advancePayment.value = advancePayment.min;
+                    }
+                }
+            }
+        }
+    }
+    
+    checkInDate.addEventListener('change', calculateCharges);
+    checkOutDate.addEventListener('change', calculateCharges);
+});
+</script>
+{% endblock %} 

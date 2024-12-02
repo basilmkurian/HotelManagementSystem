@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Staff - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Add New Staff Member</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.first_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.last_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.email.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.username.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.password1.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Confirm Password</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.password2.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Role</label>
+            {{ form.role }}
+            {% if form.role.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.role.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Add Staff Member
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

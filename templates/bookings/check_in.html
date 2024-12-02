@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Guest Check-In - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Guest Check-In</h2>
+
+    <!-- Booking Details -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-md">
+        <h3 class="text-lg font-semibold mb-4">Booking Details</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Room Number</p>
+                <p class="font-medium">{{ booking.room.room_number }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Guest Name</p>
+                <p class="font-medium">{{ booking.guest.get_full_name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-in Date</p>
+                <p class="font-medium">{{ booking.check_in_date|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-out Date</p>
+                <p class="font-medium">{{ booking.check_out_date|date:"M d, Y" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- ID Proof -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">ID Verification</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">ID Type</label>
+                    {{ form.id_type }}
+                    {% if form.id_type.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.id_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">ID Number</label>
+                    {{ form.id_number }}
+                    {% if form.id_number.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.id_number.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">ID Proof Document</label>
+                    {{ form.id_proof_document }}
+                    {% if form.id_proof_document.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.id_proof_document.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Payment Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Payment Mode</label>
+                    {{ form.payment_mode }}
+                    {% if form.payment_mode.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.payment_mode.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Advance Payment</label>
+                    {{ form.advance_payment }}
+                    {% if form.advance_payment.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.advance_payment.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Services -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Additional Services</h3>
+            <div class="space-y-2">
+                {{ form.additional_services }}
+                {% if form.additional_services.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.additional_services.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600">
+                Complete Check-In
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

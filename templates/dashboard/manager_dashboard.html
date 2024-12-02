@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+    <!-- Bookings Overview -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Bookings Overview</h2>
+        <div class="space-y-2">
+            <p>Today's Check-ins: {{ todays_checkins }}</p>
+            <p>Today's Check-outs: {{ todays_checkouts }}</p>
+            <p>Pending Reservations: {{ pending_reservations }}</p>
+            <p>Cancelled Bookings: {{ cancelled_bookings }}</p>
+        </div>
+    </div>
+
+    <!-- Room Management -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Room Management</h2>
+        <div class="space-y-2">
+            <a href="{% url 'room_create' %}" class="block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Add New Room</a>
+            <a href="{% url 'category_create' %}" class="block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add Room Category</a>
+            <a href="{% url 'room_list' %}" class="block px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">View All Rooms</a>
+        </div>
+    </div>
+
+    <!-- Housekeeping Management -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Housekeeping Management</h2>
+        <div class="space-y-2">
+            <a href="{% url 'staff_list' %}" class="block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">View Staff Schedule</a>
+            <a href="{% url 'assign_duties' %}" class="block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Assign Tasks</a>
+        </div>
+    </div>
+</div> 
+{% endblock %}

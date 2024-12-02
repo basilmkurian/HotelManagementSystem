@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Rooms - HMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Available Rooms</h1>
+    </div>
+
+    <!-- Room Grid -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for room in rooms %}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            {% if room.image %}
+            <img src="{{ room.image.url }}" alt="Room {{ room.room_number }}"
+                class="w-full h-48 object-cover">
+            {% endif %}
+
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">
+                            Room {{ room.room_number }}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            {{ room.category.name }}
+                        </p>
+                    </div>
+                    {% if user.role == 'receptionist' or user.role == 'manager' %}
+                    <div class="flex items-center space-x-2">
+                        <form method="POST" action="{% url 'update_room_status' room.id %}" class="inline">
+                            {% csrf_token %}
+                            <select name="status" 
+                                    onchange="this.form.submit()" 
+                                    class="text-sm border rounded px-2 py-1">
+                                <option value="AVAILABLE" {% if room.status == 'AVAILABLE' %}selected{% endif %}>
+                                    Available
+                                </option>
+                                <option value="OCCUPIED" {% if room.status == 'OCCUPIED' %}selected{% endif %}>
+                                    Occupied
+                                </option>
+                                <option value="MAINTENANCE" {% if room.status == 'MAINTENANCE' %}selected{% endif %}>
+                                    Maintenance
+                                </option>
+                            </select>
+                        </form>
+                    </div>
+                    {% else %}
+                    {% if user.role != 'guest' %}
+                    <span class="px-2 py-1 text-xs font-semibold rounded-full
+                               {% if room.status == 'AVAILABLE' %}bg-green-100 text-green-800
+                               {% elif room.status == 'OCCUPIED' %}bg-red-100 text-red-800
+                               {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ room.get_status_display }}
+                    </span>
+                    {% else %}
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-4">
+                    <div>
+                        <i data-lucide="users" class="inline w-4 h-4 mr-1"></i>
+                        {{ room.max_occupancy }} Guests
+                    </div>
+                    <div>
+                        <i data-lucide="bed" class="inline w-4 h-4 mr-1"></i>
+                        {{ room.bed_count }} Beds
+                    </div>
+                    {% if room.has_wifi %}
+                    <div>
+                        <i data-lucide="wifi" class="inline w-4 h-4 mr-1"></i>
+                        Wi-Fi
+                    </div>
+                    {% endif %}
+                    {% if room.has_ac %}
+                    <div>
+                        <i data-lucide="thermometer" class="inline w-4 h-4 mr-1"></i>
+                        AC
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <span class="text-xl font-bold text-gray-900">
+                        ₹{{ room.category.base_price }}/night
+                    </span>
+                    <div>
+                        {% if room.is_available_for_dates %}
+                        <a href="{% url 'booking_create' room.id %}{% if request.GET.check_in %}?check_in={{ request.GET.check_in }}&check_out={{ request.GET.check_out }}{% endif %}"
+                            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 inline-flex items-center">
+                            Book Now
+                        </a>
+                        {% else %}
+                        <button disabled class="bg-gray-300 text-gray-500 px-4 py-2 rounded-md cursor-not-allowed">
+                            Reserved
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-8 text-gray-500">
+            No rooms available at the moment.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="flex justify-center space-x-2 mt-6">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border rounded-md hover:bg-gray-100">
+            Previous
+        </a>
+        {% endif %}
+
+        <span class="px-3 py-1 border rounded-md bg-blue-500 text-white">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border rounded-md hover:bg-gray-100">
+            Next
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

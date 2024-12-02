@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - HMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header with Search -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">User Management</h1>
+        <div class="flex space-x-4">
+            <form class="flex">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search users..."
+                    class="px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600">
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Statistics -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            <p class="text-gray-600">Total Users</p>
+            <p class="text-2xl font-bold">{{ total_users }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            <p class="text-gray-600">Active Users</p>
+            <p class="text-2xl font-bold text-green-600">{{ active_users }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            <p class="text-gray-600">Inactive Users</p>
+            <p class="text-2xl font-bold text-red-600">{{ inactive_users }}</p>
+        </div>
+    </div>
+
+    <!-- Role Filters -->
+    <div class="flex space-x-4 mb-6">
+        <a href="?role=all"
+            class="px-4 py-2 rounded-md {% if current_role == 'all' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %} hover:bg-blue-600 hover:text-white">
+            All Users
+        </a>
+        {% for role_id, role_name in role_choices %}
+        <a href="?role={{ role_id }}"
+            class="px-4 py-2 rounded-md {% if current_role == role_id %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %} hover:bg-blue-600 hover:text-white">
+            {{ role_name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Users Grid -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for user in users %}
+        {% if user.role != 'admin' %}
+        <div class="bg-white rounded-lg shadow overflow-hidden" id="user-card-{{ user.id }}">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">{{ user.get_full_name }}</h3>
+                        <p class="text-sm text-gray-600">{{ user.email }}</p>
+                        <p class="text-sm text-gray-600">Role: {{ user.role|title }}</p>
+                    </div>
+                    <span
+                        class="px-2 py-1 text-xs font-semibold rounded-full status-badge
+                        {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ user.is_active|yesno:"Active,Inactive" }}
+                    </span>
+                </div>
+                <div class="border-t pt-4 flex justify-end space-x-2">
+                    <a href="{% url 'edit_user' user.id %}"
+                        class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Edit
+                    </a>
+                    <button onclick="toggleUserStatus({{ user.id }})"
+                        class="px-3 py-1 {% if user.is_active %}bg-red-500{% else %}bg-green-500{% endif %} text-white rounded hover:{% if user.is_active %}bg-red-600{% else %}bg-green-600{% endif %}">
+                        {{ user.is_active|yesno:"Deactivate,Activate" }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% empty %}
+        <div class="col-span-3 text-center py-8">
+            <p class="text-gray-500">No users found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleUserStatus(userId) {
+        if (confirm('Are you sure you want to change this user\'s status?')) {
+            fetch(`/users/${userId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

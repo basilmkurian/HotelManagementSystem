@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Supplies - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Request Supplies</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <!-- Supply Selection -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Select Supply</label>
+            {{ form.supply }}
+            {% if form.supply.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.supply.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Quantity -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Quantity Needed</label>
+            {{ form.quantity }}
+            {% if form.quantity.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.quantity.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Urgency Level -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Urgency Level</label>
+            {{ form.urgency }}
+            {% if form.urgency.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.urgency.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Additional Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.notes.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Submit Request
+            </button>
+        </div>
+    </form>
+
+    <!-- Pending Requests -->
+    {% if user.role == 'manager' %}
+    <div class="mt-8">
+        <h3 class="text-xl font-semibold mb-4">Pending Supply Requests</h3>
+        <div class="space-y-4">
+            {% for request in pending_requests %}
+            <div class="border p-4 rounded-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-semibold">{{ request.supply.name }}</p>
+                        <p class="text-sm text-gray-600">Requested by: {{ request.requested_by.get_full_name }}</p>
+                        <p class="text-sm text-gray-600">Quantity: {{ request.quantity }}</p>
+                        <p class="text-sm text-gray-600">Urgency: {{ request.get_urgency_display }}</p>
+                        {% if request.notes %}
+                        <p class="text-sm text-gray-600 mt-2">Notes: {{ request.notes }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex space-x-2">
+                        <form method="POST" action="{% url 'approve_supply_request' request.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                                Approve
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'reject_supply_request' request.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                                Reject
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No pending supply requests.</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

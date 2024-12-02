@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Details - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Booking Details</h2>
+        <span class="text-sm px-2 py-1 rounded-full
+            {% if booking.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+            {% elif booking.status == 'CONFIRMED' %}bg-green-100 text-green-800
+            {% elif booking.status == 'CHECKED_IN' %}bg-blue-100 text-blue-800
+            {% else %}bg-gray-100 text-gray-800{% endif %}">
+            {{ booking.get_status_display }}
+        </span>
+    </div>
+
+    <!-- Guest Information -->
+    <div class="mb-8">
+        <h3 class="text-lg font-semibold mb-4">Guest Information</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Guest Name</p>
+                <p class="font-medium">{{ booking.guest.get_full_name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Email</p>
+                <p class="font-medium">{{ booking.guest.email }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Phone</p>
+                <p class="font-medium">{{ booking.guest.phone_number }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Details -->
+    <div class="mb-8">
+        <h3 class="text-lg font-semibold mb-4">Room Details</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Room Number</p>
+                <p class="font-medium">{{ booking.room.room_number }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Room Type</p>
+                <p class="font-medium">{{ booking.room.category.name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-in Date</p>
+                <p class="font-medium">{{ booking.check_in_date|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Check-out Date</p>
+                <p class="font-medium">{{ booking.check_out_date|date:"M d, Y" }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Number of Adults</p>
+                <p class="font-medium">{{ booking.adults }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Number of Children</p>
+                <p class="font-medium">{{ booking.children }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Information -->
+    <div class="mb-8">
+        <h3 class="text-lg font-semibold mb-4">Payment Details</h3>
+        <div class="bg-gray-50 p-4 rounded-md">
+            <div class="flex justify-between mb-2">
+                <span>Room Charges</span>
+                <span>₹{{ booking.room_charges }}</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span>Service Charges</span>
+                <span>₹{{ booking.service_charges }}</span>
+            </div>
+            <div class="flex justify-between mb-2">
+                <span>Taxes (18%)</span>
+                <span>₹{{ booking.tax_amount }}</span>
+            </div>
+            <div class="flex justify-between font-bold pt-2 border-t">
+                <span>Total Amount</span>
+                <span>₹{{ booking.total_amount }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end space-x-4">
+        {% if user.role == 'guest' %}
+        <a href="{% url 'bill_details' booking.id %}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+            View Bill
+        </a>
+        {% endif %}
+        <a href="{% url 'booking_list' %}" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+            Back to List
+        </a>
+    </div>
+</div>
+{% endblock %}

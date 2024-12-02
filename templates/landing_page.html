@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to HMS - Luxury Hotel Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div class="container mx-auto px-4 py-20">
+            <div class="max-w-3xl">
+                <h1 class="text-5xl font-bold mb-6">Experience Luxury at Its Finest</h1>
+                <p class="text-xl mb-8">Welcome to HMS, where exceptional service meets modern comfort.</p>
+                <div class="space-x-4">
+                    <a href="{% url 'register' %}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300">
+                        Register Now
+                    </a>
+                    <a href="{% url 'login' %}" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300">
+                        Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold text-center mb-12">Why Choose HMS?</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-blue-600 text-4xl mb-4">🌟</div>
+                <h3 class="text-xl font-semibold mb-3">Luxury Rooms</h3>
+                <p class="text-gray-600">Experience comfort in our meticulously designed rooms with modern amenities.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-blue-600 text-4xl mb-4">🏆</div>
+                <h3 class="text-xl font-semibold mb-3">Premium Service</h3>
+                <p class="text-gray-600">Our dedicated staff ensures your stay is nothing short of exceptional.</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="text-blue-600 text-4xl mb-4">📱</div>
+                <h3 class="text-xl font-semibold mb-3">Easy Booking</h3>
+                <p class="text-gray-600">Book your stay with our simple and secure online system.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

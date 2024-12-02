@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Bookings - HMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Bookings</h1>
+        <div class="flex space-x-4">
+            {% if user.is_staff %}
+            <a href="{% url 'receptionist_booking' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                New Booking
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Booking Status Filters -->
+    <div class="flex space-x-4 mb-6">
+        <button class="px-4 py-2 rounded-md {% if status == 'all' %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %} hover:bg-blue-600 hover:text-white">
+            All
+        </button>
+    </div>
+
+    <!-- Bookings Grid -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {% for booking in bookings %}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">
+                            Room {{ booking.room.room_number }}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            Guest: {{ booking.guest.get_full_name }}
+                        </p>
+                    </div>
+                    <span class="px-2 py-1 text-sm rounded 
+                        {% if booking.status == 'CONFIRMED' %}bg-green-100 text-green-800
+                        {% elif booking.status == 'CHECKED_IN' %}bg-blue-100 text-blue-800
+                        {% elif booking.status == 'CHECKED_OUT' %}bg-gray-100 text-gray-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ booking.get_status_display }}
+                    </span>
+                </div>
+
+                <div class="space-y-2 text-sm text-gray-600">
+                    <p>Check-in: {{ booking.check_in_date|date:"M d, Y" }}</p>
+                    <p>Check-out: {{ booking.check_out_date|date:"M d, Y" }}</p>
+                    <p>Room Type: {{ booking.room.category.name }}</p>
+                    <p>Total Amount: ₹{{ booking.total_amount }}</p>
+                </div>
+
+                <div class="border-t mt-4 pt-4">
+                    <div class="flex justify-end space-x-2">
+                        {% if booking.status == 'CONFIRMED' and user.role != 'guest' %}
+                        <a href="{% url 'check_in' booking.id %}" 
+                           class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                            Check In
+                        </a>
+                        {% if user == booking.guest %}
+                        <a href="{% url 'cancel_booking' booking.id %}" 
+                           class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                           onclick="return confirm('Are you sure you want to cancel this booking?')">
+                            Cancel
+                        </a>
+                        {% endif %}
+                        {% elif booking.status == 'CHECKED_IN' and user.role != 'guest' %}
+                        <a href="{% url 'check_out' booking.id %}"
+                           class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                            Check Out
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'booking_detail' booking.id %}"
+                           class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-3 text-center py-8">
+            <p class="text-gray-500">No bookings found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

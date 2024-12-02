@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Leave a Review - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Share Your Experience</h2>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Cleanliness Rating -->
+        <div class="rating-group">
+            <label class="block text-gray-700 font-bold mb-2">Cleanliness</label>
+            <div class="flex space-x-4" id="cleanlinessStars">
+                {% for i in "12345" %}
+                <input type="radio" name="cleanliness_rating" value="{{ forloop.counter }}" class="hidden"
+                    id="clean_{{ forloop.counter }}">
+                <label for="clean_{{ forloop.counter }}" class="text-3xl cursor-pointer star">☆</label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Staff Rating -->
+        <div class="rating-group">
+            <label class="block text-gray-700 font-bold mb-2">Staff Behavior</label>
+            <div class="flex space-x-4" id="staffStars">
+                {% for i in "12345" %}
+                <input type="radio" name="staff_rating" value="{{ forloop.counter }}" class="hidden"
+                    id="staff_{{ forloop.counter }}">
+                <label for="staff_{{ forloop.counter }}" class="text-3xl cursor-pointer star">☆</label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Food Rating -->
+        <div class="rating-group">
+            <label class="block text-gray-700 font-bold mb-2">Food Quality</label>
+            <div class="flex space-x-4" id="foodStars">
+                {% for i in "12345" %}
+                <input type="radio" name="food_rating" value="{{ forloop.counter }}" class="hidden"
+                    id="food_{{ forloop.counter }}">
+                <label for="food_{{ forloop.counter }}" class="text-3xl cursor-pointer star">☆</label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Overall Rating -->
+        <div class="rating-group">
+            <label class="block text-gray-700 font-bold mb-2">Overall Experience</label>
+            <div class="flex space-x-4" id="overallStars">
+                {% for i in "12345" %}
+                <input type="radio" name="overall_rating" value="{{ forloop.counter }}" class="hidden"
+                    id="overall_{{ forloop.counter }}">
+                <label for="overall_{{ forloop.counter }}" class="text-3xl cursor-pointer star">☆</label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Feedback -->
+        <div>
+            <label class="block text-gray-700 font-bold mb-2">Additional Feedback</label>
+            <textarea name="feedback" rows="4"
+                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Share your thoughts..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+            Submit Review
+        </button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingGroups = ['cleanliness', 'staff', 'food', 'overall'];
+
+        ratingGroups.forEach(group => {
+            const stars = document.querySelectorAll(`#${group}Stars .star`);
+
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseover', () => {
+                    stars.forEach((s, i) => {
+                        s.textContent = i <= index ? '★' : '☆';
+                    });
+                });
+
+                star.addEventListener('mouseout', () => {
+                    const selected = document.querySelector(`input[name="${group}_rating"]:checked`);
+                    stars.forEach((s, i) => {
+                        s.textContent = selected && i < selected.value ? '★' : '☆';
+                    });
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

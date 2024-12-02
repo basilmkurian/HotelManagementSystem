@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Room for Guest - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Book Room for Guest</h2>
+
+    <!-- Room Details -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-md">
+        <h3 class="text-lg font-semibold mb-4">Room Details</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Room Number</p>
+                <p class="font-medium">{{ room.room_number }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Room Type</p>
+                <p class="font-medium">{{ room.category.name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Price per Night</p>
+                <p class="font-medium">₹{{ room.category.base_price }}</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Guest Information -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Guest Information</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.phone_number.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Dates -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Check-in Date</label>
+                {{ form.check_in_date }}
+                {% if form.check_in_date.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.check_in_date.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Check-out Date</label>
+                {{ form.check_out_date }}
+                {% if form.check_out_date.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.check_out_date.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Guest Details -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Stay Details</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Number of Adults</label>
+                    {{ form.adults }}
+                    {% if form.adults.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.adults.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Number of Children</label>
+                    {{ form.children }}
+                    {% if form.children.errors %}
+                    <p class="text-red-500 text-xs italic">{{ form.children.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Payment Details</h3>
+            <div class="bg-gray-50 p-4 rounded-md mb-4">
+                <div class="flex justify-between mb-2">
+                    <span>Room Charges</span>
+                    <span id="roomCharges">₹0.00</span>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <span>Taxes (18%)</span>
+                    <span id="taxes">₹0.00</span>
+                </div>
+                <div class="flex justify-between font-bold">
+                    <span>Total Amount</span>
+                    <span id="totalAmount">₹0.00</span>
+                </div>
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Payment Mode</label>
+                {{ form.payment_mode }}
+                {% if form.payment_mode.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.payment_mode.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'room_list' %}" class="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600">
+                Cancel
+            </a>
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Confirm Booking
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkInDate = document.getElementById('id_check_in_date');
+    const checkOutDate = document.getElementById('id_check_out_date');
+    const roomRate = {{ room_price|default:0 }};
+    
+    // Set initial values
+    document.getElementById('roomCharges').textContent = `₹${roomRate.toFixed(2)}`;
+    document.getElementById('taxes').textContent = `₹${(roomRate * 0.18).toFixed(2)}`;
+    document.getElementById('totalAmount').textContent = `₹${(roomRate * 1.18).toFixed(2)}`;
+    
+    function calculateCharges() {
+        if (checkInDate.value && checkOutDate.value) {
+            const start = new Date(checkInDate.value);
+            const end = new Date(checkOutDate.value);
+            const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            
+            if (nights > 0) {
+                const roomCharges = nights * roomRate;
+                const taxes = roomCharges * 0.18;
+                const total = roomCharges + taxes;
+                
+                document.getElementById('roomCharges').textContent = `₹${roomCharges.toFixed(2)}`;
+                document.getElementById('taxes').textContent = `₹${taxes.toFixed(2)}`;
+                document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
+            }
+        }
+    }
+    
+    checkInDate.addEventListener('change', calculateCharges);
+    checkOutDate.addEventListener('change', calculateCharges);
+});
+</script>
+{% endblock %} 

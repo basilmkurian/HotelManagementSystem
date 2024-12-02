@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Management - HMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header with Search and Tabs -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Staff Management</h1>
+        <div class="flex space-x-4">
+            <form class="flex" method="GET">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search staff..."
+                    class="px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600">
+                    Search
+                </button>
+            </form>
+            <a href="{% url 'add_staff' %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                Add Staff Member
+            </a>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8">
+            <a href="?tab=profiles"
+                class="{% if current_tab == 'profiles' %}border-b-2 border-blue-500{% endif %} py-4 px-1">
+                Staff Profiles
+            </a>
+            <a href="?tab=shifts"
+                class="{% if current_tab == 'shifts' %}border-b-2 border-blue-500{% endif %} py-4 px-1">
+                Shift Management
+            </a>
+            <a href="?tab=tasks" class="{% if current_tab == 'tasks' %}border-b-2 border-blue-500{% endif %} py-4 px-1">
+                Task Assignment
+            </a>
+            <a href="?tab=payroll"
+                class="{% if current_tab == 'payroll' %}border-b-2 border-blue-500{% endif %} py-4 px-1">
+                Payroll Summary
+            </a>
+        </nav>
+    </div>
+
+    {% if current_tab == 'profiles' %}
+    <!-- Staff Grid (existing code) -->
+    {% include "admin/staff_profiles.html" %}
+    {% elif current_tab == 'shifts' %}
+    <!-- Shift Management -->
+    {% include "admin/staff_shifts.html" %}
+    {% elif current_tab == 'tasks' %}
+    <!-- Task Assignment -->
+    {% include "admin/staff_tasks.html" %}
+    {% else %}
+    <!-- Payroll Summary -->
+    {% include "admin/staff_payroll.html" %}
+    {% endif %}
+</div>
+
+<script>
+    function toggleStaffStatus(staffId) {
+        if (confirm('Are you sure you want to change this staff member\'s status?')) {
+            fetch(`/staff/${staffId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}

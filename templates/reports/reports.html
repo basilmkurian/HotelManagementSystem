@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports & Analytics - HMS{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated and user.role in 'admin,manager' %}
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
+            <div class="flex space-x-4">
+                <button onclick="printReport()" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                    Print Report
+                </button>
+                <button onclick="exportCSV()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                    Export CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6">
+            <form class="flex space-x-4" method="get">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">From Date</label>
+                    <input type="date" name="from_date" value="{{ from_date|date:'Y-m-d' }}" 
+                           class="mt-1 block rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">To Date</label>
+                    <input type="date" name="to_date" value="{{ to_date|date:'Y-m-d' }}" 
+                           class="mt-1 block rounded-md border-gray-300 shadow-sm">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                        Apply Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Revenue Report -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Revenue Report</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span>Total Revenue</span>
+                        <span class="font-semibold">₹{{ revenue.total_revenue }}</span>
+                    </div>
+                    <h3 class="text-lg font-medium mt-4 mb-2">Payment Methods</h3>
+                    {% for method, amount in revenue.payment_methods.items %}
+                    <div class="flex justify-between items-center">
+                        <span>{{ method }}</span>
+                        <span class="font-semibold">₹{{ amount }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Occupancy Report -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Occupancy Report</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span>Average Occupancy Rate</span>
+                        <span class="font-semibold">{{ occupancy.average_occupancy }}%</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Peak Occupancy Date</span>
+                        <span class="font-semibold">{{ occupancy.peak_date|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Peak Occupancy</span>
+                        <span class="font-semibold">{{ occupancy.peak_occupancy }} rooms</span>
+                    </div>
+                    <h3 class="text-lg font-medium mt-4 mb-2">Popular Room Categories</h3>
+                    {% for category in occupancy.popular_categories %}
+                    <div class="flex justify-between items-center">
+                        <span>{{ category.room__category__name }}</span>
+                        <span class="font-semibold">{{ category.total_bookings }} bookings</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Staff Performance -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Staff Performance</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span>Total Tasks</span>
+                        <span class="font-semibold">{{ staff.task_statistics.total_tasks }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Completed Tasks</span>
+                        <span class="font-semibold">{{ staff.task_statistics.completed_tasks }}</span>
+                    </div>
+                    
+                    <h3 class="text-lg font-medium mt-4 mb-2">Top Supply Usage</h3>
+                    {% for item in staff.supply_usage %}
+                    <div class="flex justify-between items-center">
+                        <span>{{ item.supply__name }}</span>
+                        <span class="font-semibold">{{ item.total_quantity }} units</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Booking Trends -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h2 class="text-xl font-semibold mb-4">Booking Trends</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span>Total Bookings</span>
+                        <span class="font-semibold">{{ trends.booking_statistics.total_bookings }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Average Stay Duration</span>
+                        <span class="font-semibold">{{ trends.booking_statistics.avg_stay_duration.days }} nights</span>
+                    </div>
+
+                    <h3 class="text-lg font-medium mt-4 mb-2">Booking Status</h3>
+                    {% for status in trends.booking_statistics.status_breakdown %}
+                    <div class="flex justify-between items-center">
+                        <span>{{ status.status }}</span>
+                        <span class="font-semibold">{{ status.count }}</span>
+                    </div>
+                    {% endfor %}
+
+                    <h3 class="text-lg font-medium mt-4 mb-2">Average Ratings</h3>
+                    {% for category, rating in trends.ratings.items %}
+                    <div class="flex justify-between items-center">
+                        <span>{{ category|title }}</span>
+                        <span class="font-semibold">{{ rating }}/5</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <strong class="font-bold">Access Denied!</strong>
+            <span class="block sm:inline">You don't have permission to view this page.</span>
+        </div>
+    </div>
+{% endif %}
+
+<script>
+function printReport() {
+    // Add print-specific styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @media print {
+            /* Hide non-report elements */
+            button, form, .container > .flex:first-child, nav, header { display: none !important; }
+            
+            /* Ensure white background and black text */
+            body { 
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* Reset all page margins */
+            @page {
+                margin: 0.5cm;
+                size: auto;
+            }
+            
+            /* Improve layout for printing */
+            .grid { 
+                grid-template-columns: 1fr 1fr !important;
+                page-break-inside: avoid;
+            }
+            .rounded-lg { 
+                border: 1px solid #eee;
+                page-break-inside: avoid;
+            }
+            
+            /* Remove shadow effects */
+            .shadow { box-shadow: none !important; }
+
+            /* Adjust container spacing */
+            .container { 
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Ensure each report card stays together */
+            .bg-white {
+                page-break-inside: avoid;
+            }
+
+            /* Hide any other potential blank pages */
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    window.print();
+    document.head.removeChild(style);
+}
+
+function exportCSV() {
+    // Collect data from the report sections
+    const data = {
+        revenue: {
+            total: document.querySelector('.bg-white:nth-child(1) .font-semibold').innerText,
+            methods: Array.from(document.querySelectorAll('.bg-white:nth-child(1) .space-y-4 > div:not(:first-child)')).map(div => ({
+                method: div.children[0].innerText,
+                amount: div.children[1].innerText
+            }))
+        },
+        occupancy: {
+            rate: document.querySelector('.bg-white:nth-child(2) .font-semibold').innerText,
+            categories: Array.from(document.querySelectorAll('.bg-white:nth-child(2) .space-y-4 > div:not(:first-child)')).map(div => ({
+                category: div.children[0].innerText,
+                bookings: div.children[1].innerText
+            }))
+        }
+    };
+
+    // Create CSV content
+    let csvContent = 'Category,Metric,Value\n';
+    
+    // Add revenue data
+    csvContent += `Revenue,Total,${data.revenue.total}\n`;
+    data.revenue.methods.forEach(({method, amount}) => {
+        csvContent += `Revenue,${method},${amount}\n`;
+    });
+    
+    // Add occupancy data
+    csvContent += `Occupancy,Rate,${data.occupancy.rate}\n`;
+    data.occupancy.categories.forEach(({category, bookings}) => {
+        csvContent += `Occupancy,${category},${bookings}\n`;
+    });
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `hotel_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+{% endblock %} 

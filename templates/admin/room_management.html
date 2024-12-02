@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Room Management - HMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Room Management</h1>
+        <div class="space-x-4">
+            <a href="{% url 'room_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                Add New Room
+            </a>
+            <a href="{% url 'category_create' %}" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                Add Category
+            </a>
+        </div>
+    </div>
+
+    <!-- Room Categories -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold mb-4">Room Categories</h2>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {% for category in room_categories %}
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold">{{ category.name }}</h3>
+                        <p class="text-sm text-gray-600">Base Price: ₹{{ category.base_price }}</p>
+                    </div>
+                    <a href="#" class="text-blue-500 hover:underline">Edit</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Rooms List -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Room Number</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for room in rooms %}
+                <tr>
+                    <td class="px-6 py-4">{{ room.room_number }}</td>
+                    <td class="px-6 py-4">{{ room.category.name }}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 text-xs rounded-full 
+                            {% if room.status == 'AVAILABLE' %}bg-green-100 text-green-800
+                            {% elif room.status == 'OCCUPIED' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ room.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <a href="{% url 'edit_room' room.id %}" class="text-blue-500 hover:underline">Edit</a>
+                        <a href="{% url 'delete_room' room.id %}" class="text-red-500 hover:underline">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

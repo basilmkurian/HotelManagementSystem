@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Assign Housekeeping Duties - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Assign Housekeeping Duties</h2>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Staff Selection -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Select Staff Member</label>
+            {{ form.assigned_to }}
+            {% if form.assigned_to.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.assigned_to.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Room Selection -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Select Room</label>
+            {{ form.room }}
+            {% if form.room.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.room.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Task Type -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Task Type</label>
+            {{ form.task_type }}
+            {% if form.task_type.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.task_type.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Priority -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Priority Level</label>
+            {{ form.priority }}
+            {% if form.priority.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.priority.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Additional Notes</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.notes.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Assign Task
+            </button>
+        </div>
+    </form>
+
+    <!-- Current Tasks -->
+    <div class="mt-8">
+        <h3 class="text-xl font-semibold mb-4">Current Assignments</h3>
+        <div class="space-y-4">
+            {% for task in current_tasks %}
+            <div class="border p-4 rounded-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-semibold">Room {{ task.room.room_number }}</p>
+                        <p class="text-sm text-gray-600">Assigned to: {{ task.assigned_to.get_full_name }}</p>
+                        <p class="text-sm text-gray-600">Task: {{ task.task_type }}</p>
+                        <p class="text-sm text-gray-600">Priority: {{ task.priority }}</p>
+                    </div>
+                    <span class="px-2 py-1 text-sm rounded {% if task.status == 'pending' %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+                        {{ task.status }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No current tasks assigned.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

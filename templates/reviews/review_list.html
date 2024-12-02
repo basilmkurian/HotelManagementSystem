@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}All Reviews - HMS{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Guest Reviews</h1>
+    </div>
+
+    <!-- Rating Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            <p class="text-gray-600">Average Rating</p>
+            <p class="text-2xl font-bold text-blue-600">{{ avg_rating|floatformat:1 }}/5</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            <p class="text-gray-600">Cleanliness</p>
+            <p class="text-2xl font-bold text-green-600">{{ avg_cleanliness|floatformat:1 }}/5</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            <p class="text-gray-600">Staff Service</p>
+            <p class="text-2xl font-bold text-yellow-600">{{ avg_staff|floatformat:1 }}/5</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow text-center">
+            <p class="text-gray-600">Food Quality</p>
+            <p class="text-2xl font-bold text-orange-600">{{ avg_food|floatformat:1 }}/5</p>
+        </div>
+    </div>
+
+    <!-- Reviews Grid -->
+    <div class="grid gap-6 md:grid-cols-2">
+        {% for review in reviews %}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">
+                            {{ review.booking.guest.get_full_name }}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                            Room {{ review.booking.room.room_number }} • 
+                            {{ review.created_at|date:"M d, Y" }}
+                        </p>
+                    </div>
+                    <div class="flex items-center">
+                        {% for i in "12345" %}
+                        {% if forloop.counter <= review.overall_rating %}
+                        <span class="text-xl text-yellow-400">★</span>
+                        {% else %}
+                        <span class="text-xl text-gray-300">★</span>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <p class="text-gray-700 mb-4">{{ review.feedback }}</p>
+                
+                <div class="grid grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div class="text-center">
+                        <p class="font-semibold">Cleanliness</p>
+                        <p>{{ review.cleanliness_rating }}/5</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="font-semibold">Staff</p>
+                        <p>{{ review.staff_rating }}/5</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="font-semibold">Food</p>
+                        <p>{{ review.food_rating }}/5</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-2 text-center py-8">
+            <p class="text-gray-500">No reviews found.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if reviews.has_other_pages %}
+    <div class="flex justify-center space-x-2 mt-6">
+        {% if reviews.has_previous %}
+        <a href="?page={{ reviews.previous_page_number }}" 
+           class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+            Previous
+        </a>
+        {% endif %}
+        
+        {% for num in reviews.paginator.page_range %}
+        <a href="?page={{ num }}" 
+           class="px-3 py-1 {% if reviews.number == num %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-700{% endif %} rounded hover:bg-blue-600">
+            {{ num }}
+        </a>
+        {% endfor %}
+        
+        {% if reviews.has_next %}
+        <a href="?page={{ reviews.next_page_number }}" 
+           class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+            Next
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

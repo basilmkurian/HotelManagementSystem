@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Statistics Cards -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Hotel Statistics</h2>
+        <div class="space-y-2">
+            <p>Total Rooms: {{ total_rooms }}</p>
+            <p>Occupied Rooms: {{ occupied_rooms }}</p>
+            <p>Available Rooms: {{ available_rooms }}</p>
+            <p>Reserved Rooms: {{ reserved_rooms }}</p>
+            <p>Total Bookings: {{ total_bookings }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Quick Actions</h2>
+        <div class="space-y-2">
+            <a href="{% url 'user_management' %}" class="block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Manage Users</a>
+            <a href="{% url 'room_management' %}" class="block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Manage Rooms</a>
+            <a href="{% url 'staff_management' %}" class="block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Manage Staff</a>
+            <a href="{% url 'generate_reports' %}" class="block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Generate Reports</a>
+        </div>
+    </div>
+
+    <!-- Recent Reviews & Feedback -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Recent Reviews</h2>
+        <div class="space-y-4">
+            {% for review in recent_reviews %}
+            <div class="border-b pb-4 last:border-b-0 last:pb-0">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="font-medium">{{ review.booking.guest.get_full_name }}</p>
+                    <div class="flex items-center">
+                        {% for i in "12345" %}
+                        {% if forloop.counter <= review.overall_rating %}
+                        <span class="text-xl text-yellow-400">★</span>
+                        {% else %}
+                        <span class="text-xl text-gray-300">★</span>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-1">Room {{ review.booking.room.room_number }}</p>
+                <p class="text-sm text-gray-500">{{ review.feedback|truncatechars:100 }}</p>
+                <div class="mt-2 text-xs text-gray-400">
+                    <span>Cleanliness: {{ review.cleanliness_rating }}/5</span>
+                    <span class="mx-2">•</span>
+                    <span>Staff: {{ review.staff_rating }}/5</span>
+                    <span class="mx-2">•</span>
+                    <span>Food: {{ review.food_rating }}/5</span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center">No reviews yet</p>
+            {% endfor %}
+            <div class="mt-4">
+                <a href="{% url 'review_list' %}" class="text-blue-500 hover:underline">View All Reviews</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

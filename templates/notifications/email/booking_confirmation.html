@@ -1,0 +1,23 @@
+{% extends 'email_base.html' %}
+
+{% block content %}
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h2 style="color: #2c5282;">{{ title }}</h2>
+    
+    <p>Dear {{ user.get_full_name }},</p>
+    
+    <p>{{ message }}</p>
+    
+    <div style="background-color: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p><strong>Booking Reference:</strong> #{{ booking.id }}</p>
+        <p><strong>Room Number:</strong> {{ booking.room.room_number }}</p>
+        <p><strong>Check-in Date:</strong> {{ booking.check_in_date|date:"M d, Y" }}</p>
+        <p><strong>Check-out Date:</strong> {{ booking.check_out_date|date:"M d, Y" }}</p>
+        <p><strong>Total Amount:</strong> ₹{{ booking.total_amount }}</p>
+    </div>
+    
+    <p>If you have any questions, please don't hesitate to contact us.</p>
+    
+    <p>Thank you for choosing our hotel!</p>
+</div>
+{% endblock %} 

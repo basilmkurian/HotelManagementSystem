@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <!-- User Details Card -->
+    <div class="bg-white p-8 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-6">Profile Details</h2>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="font-bold">Username:</div>
+            <div>{{ user.username }}</div>
+            
+            <div class="font-bold">Email:</div>
+            <div>{{ user.email }}</div>
+            
+            <div class="font-bold">Role:</div>
+            <div>{{ user.role|title }}</div>
+            
+            <div class="font-bold">Phone Number:</div>
+            <div>{{ user.phone_number }}</div>
+            
+            <div class="font-bold">2FA Status:</div>
+            <div>{{ user.two_factor_enabled|yesno:"Enabled,Disabled" }}</div>
+        </div>
+
+        <!-- 2FA Toggle Button -->
+        <form method="post" action="{% url 'toggle_2fa' %}" class="mb-4">
+            {% csrf_token %}
+            <button type="submit" 
+                    class="{% if user.two_factor_enabled %}bg-red-500 hover:bg-red-600{% else %}bg-green-500 hover:bg-green-600{% endif %} text-white font-bold py-2 px-4 rounded">
+                {% if user.two_factor_enabled %}
+                    Disable 2FA
+                {% else %}
+                    Enable 2FA
+                {% endif %}
+            </button>
+        </form>
+    </div>
+
+    <!-- Update Profile Form -->
+    <div class="bg-white p-8 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-6">Update Profile</h2>
+        <form method="post" action="{% url 'profile_update' %}">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                <p class="text-red-500 text-xs italic">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Update Profile
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

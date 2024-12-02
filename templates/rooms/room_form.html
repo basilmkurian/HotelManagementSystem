@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Room - HMS{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Create New Room</h2>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Room Number</label>
+                {{ form.room_number }}
+                {% if form.room_number.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.room_number.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Room Category</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Max Occupancy</label>
+                {{ form.max_occupancy }}
+                {% if form.max_occupancy.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.max_occupancy.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Bed Count</label>
+                {{ form.bed_count }}
+                {% if form.bed_count.errors %}
+                <p class="text-red-500 text-xs italic">{{ form.bed_count.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="flex items-center">
+                {{ form.has_wifi }}
+                <label class="ml-2 text-gray-700 text-sm font-bold">Wi-Fi Available</label>
+            </div>
+            
+            <div class="flex items-center">
+                {{ form.has_ac }}
+                <label class="ml-2 text-gray-700 text-sm font-bold">AC Available</label>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Room Status</label>
+            {{ form.status }}
+            {% if form.status.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.status.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Room Image</label>
+            {{ form.image }}
+            {% if form.image.errors %}
+            <p class="text-red-500 text-xs italic">{{ form.image.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600">
+                Create Room
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 

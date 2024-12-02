@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Today's Tasks -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Today's Tasks</h2>
+        <div class="space-y-2">
+            {% for task in tasks %}
+            <div class="border-b pb-2">
+                <p>Room {{ task.room.room_number }} - {{ task.task_type }}</p>
+                <p class="text-sm text-gray-600">Assigned to: {{ task.assigned_to.get_full_name }}</p>
+                <p class="text-sm text-gray-500">Priority: {{ task.priority }}</p>
+                <div class="mt-2">
+                    <form method="POST" action="{% url 'update_task_status' task.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Mark Complete</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">No tasks assigned for today.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Supplies Status -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Supplies Status</h2>
+        <div class="space-y-2">
+            {% if supplies %}
+                {% for supply in supplies %}
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="font-medium">{{ supply.name }}</span>
+                    <div class="flex items-center space-x-4">
+                        <span class="{% if supply.quantity < supply.minimum_threshold %}text-red-500 font-semibold{% else %}text-gray-600{% endif %}">
+                            {{ supply.quantity }} remaining
+                        </span>
+                        {% if supply.quantity < supply.minimum_threshold %}
+                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Low Stock</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">No supplies information available.</p>
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-500 text-center py-4">No supplies information available.</p>
+            {% endif %}
+            <a href="{% url 'request_supplies' %}" class="block mt-4 px-4 py-2 bg-blue-500 text-white rounded text-center hover:bg-blue-600">
+                Request Supplies
+            </a>
+        </div>
+    </div>
+
+    <!-- Spend Supplies -->
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4">Spend Supplies</h2>
+        <form method="POST" action="{% url 'spend_supplies' %}" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Select Supply</label>
+                <select name="supply_id" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <option value="">Select a supply item</option>
+                    {% for supply in supplies %}
+                        {% if supply.quantity > 0 %}
+                        <option value="{{ supply.id }}">{{ supply.name }} ({{ supply.quantity }} available)</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
+                <input type="number" name="quantity" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Reason</label>
+                <textarea name="reason" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" required></textarea>
+            </div>
+            <div>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded text-center hover:bg-blue-600">
+                    Spend Supplies
+                </button>
+            </div>
+        </form>
+    </div>
+</div> 
+{% endblock %}
