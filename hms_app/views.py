@@ -605,7 +605,6 @@ def receptionist_booking(request):
     return render(request, 'bookings/receptionist_booking.html', context)
 
 @login_required
-@user_passes_test(lambda u: u.role == 'receptionist')
 def check_in(request, booking_id):
     """Processes guest check-in with ID verification and initial payment."""
     booking = get_object_or_404(Booking, id=booking_id)
