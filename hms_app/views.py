@@ -1246,12 +1246,10 @@ def process_cash_payment(request, booking_id):
 def generate_reports(request):
     """Generates reports for operational statistics."""
     try:
-        # Get date range, defaulting to last 30 days
         today = timezone.now().date()
         start_date = request.GET.get('from_date', (today - timedelta(days=30)).strftime('%Y-%m-%d'))
         end_date = request.GET.get('to_date', today.strftime('%Y-%m-%d'))
         
-        # Convert string dates to timezone-aware datetime objects
         start_datetime = timezone.make_aware(datetime.strptime(start_date, '%Y-%m-%d'))
         end_datetime = timezone.make_aware(datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)) - timedelta(seconds=1)
         
@@ -1272,13 +1270,11 @@ def generate_reports(request):
 
 def get_revenue_data(start_datetime, end_datetime):
     """Calculate basic revenue metrics"""
-    # Get successful payments in date range
     payments = Payment.objects.filter(
         payment_date__range=[start_datetime, end_datetime],
         status='SUCCESS'
     )
     
-    # Calculate total revenue and payment methods
     total_revenue = payments.aggregate(total=Sum('amount'))['total'] or 0
     payment_methods = payments.values('payment_method').annotate(
         total=Sum('amount')
@@ -1296,7 +1292,6 @@ def get_occupancy_data(start_date, end_date):
     """Calculate room occupancy metrics"""
     total_rooms = Room.objects.count()
     
-    # Get active bookings in date range
     bookings = Booking.objects.filter(
         check_in_date__lte=end_date,
         check_out_date__gte=start_date,
@@ -1308,16 +1303,14 @@ def get_occupancy_data(start_date, end_date):
     total_possible_days = total_rooms * days_in_range
     occupied_days = bookings.count() * days_in_range
     
-    # Get popular room categories
     popular_categories = bookings.values(
         'room__category__name'
     ).annotate(
         total_bookings=Count('id')
     ).order_by('-total_bookings')
     
-    # Find peak occupancy
-    peak_date = start_date  # Default to start date
-    peak_occupancy = bookings.count()  # Default to total bookings
+    peak_date = start_date 
+    peak_occupancy = bookings.count()  
     
     return {
         'average_occupancy': round((occupied_days / total_possible_days * 100), 2) if total_possible_days > 0 else 0,
@@ -1329,14 +1322,12 @@ def get_occupancy_data(start_date, end_date):
 
 def get_staff_data(start_datetime, end_datetime):
     """Calculate staff performance metrics"""
-    # Get all tasks in date range
     tasks = HousekeepingTask.objects.filter(
         created_at__range=[start_datetime, end_datetime]
     )
     
     completed_tasks = tasks.filter(status='completed')
     
-    # Get supply usage
     supply_usage = SupplyUsage.objects.filter(
         usage_date__range=[start_datetime, end_datetime]
     ).values(
@@ -1355,22 +1346,18 @@ def get_staff_data(start_datetime, end_datetime):
 
 def get_booking_data(start_datetime, end_datetime):
     """Calculate booking trends and review metrics"""
-    # Get bookings in date range
     bookings = Booking.objects.filter(
         created_at__range=[start_datetime, end_datetime]
     )
     
-    # Calculate average stay duration
     avg_stay = bookings.aggregate(
         avg_duration=Avg(F('check_out_date') - F('check_in_date'))
     )['avg_duration']
     
-    # Get booking status breakdown
     status_breakdown = bookings.values('status').annotate(
         count=Count('id')
     ).order_by('status')
     
-    # Get reviews and calculate ratings
     reviews = Review.objects.filter(
         created_at__range=[start_datetime, end_datetime]
     )
